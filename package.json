@@ -21,7 +21,7 @@
     "lint": "./node_modules/.bin/eslint src/** tests/**",
     "test": "npm run lint && ./node_modules/.bin/nyc --reporter=lcov ./node_modules/.bin/mocha --compilers js:babel-core/register",
     "build": "npm run clean && npm run build-regression-js && npm run build-regression-min-js",
-    "build-regression-js": "BABEL_ENV=production ./node_modules/.bin/babel src/regression.js --out-file dist/regression.js",
+    "build-regression-js": "src/regression.js --out-file dist/regression.js",
     "build-regression-min-js": " ./node_modules/.bin/uglifyjs dist/regression.js --output dist/regression.min.js"
   },
   "devDependencies": {
