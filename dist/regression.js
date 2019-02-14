@@ -1,4 +1,12 @@
-const DEFAULT_OPTIONS = { order: 2, precision: 2, period: null };
+'use strict';
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+var DEFAULT_OPTIONS = { order: 2, precision: 2, period: null };
 
 /**
 * Determine the coefficient of determination (r^2) of a fit from the observations
@@ -10,31 +18,33 @@ const DEFAULT_OPTIONS = { order: 2, precision: 2, period: null };
 * @return {number} - The r^2 value, or NaN if one cannot be calculated.
 */
 function determinationCoefficient(data, results) {
-  const predictions = [];
-  const observations = [];
+  var predictions = [];
+  var observations = [];
 
-  data.forEach((d, i) => {
+  data.forEach(function (d, i) {
     if (d[1] !== null) {
       observations.push(d);
       predictions.push(results[i]);
     }
   });
 
-  const sum = observations.reduce((a, observation) => a + observation[1], 0);
-  const mean = sum / observations.length;
+  var sum = observations.reduce(function (a, observation) {
+    return a + observation[1];
+  }, 0);
+  var mean = sum / observations.length;
 
-  const ssyy = observations.reduce((a, observation) => {
-    const difference = observation[1] - mean;
-    return a + (difference * difference);
+  var ssyy = observations.reduce(function (a, observation) {
+    var difference = observation[1] - mean;
+    return a + difference * difference;
   }, 0);
 
-  const sse = observations.reduce((accum, observation, index) => {
-    const prediction = predictions[index];
-    const residual = observation[1] - prediction[1];
-    return accum + (residual * residual);
+  var sse = observations.reduce(function (accum, observation, index) {
+    var prediction = predictions[index];
+    var residual = observation[1] - prediction[1];
+    return accum + residual * residual;
   }, 0);
 
-  return 1 - (sse / ssyy);
+  return 1 - sse / ssyy;
 }
 
 /**
@@ -47,38 +57,38 @@ function determinationCoefficient(data, results) {
 * @return {Array<number>} - Vector of normalized solution coefficients matrix (x)
 */
 function gaussianElimination(input, order) {
-  const matrix = input;
-  const n = input.length - 1;
-  const coefficients = [order];
+  var matrix = input;
+  var n = input.length - 1;
+  var coefficients = [order];
 
-  for (let i = 0; i < n; i++) {
-    let maxrow = i;
-    for (let j = i + 1; j < n; j++) {
+  for (var i = 0; i < n; i++) {
+    var maxrow = i;
+    for (var j = i + 1; j < n; j++) {
       if (Math.abs(matrix[i][j]) > Math.abs(matrix[i][maxrow])) {
         maxrow = j;
       }
     }
 
-    for (let k = i; k < n + 1; k++) {
-      const tmp = matrix[k][i];
+    for (var k = i; k < n + 1; k++) {
+      var tmp = matrix[k][i];
       matrix[k][i] = matrix[k][maxrow];
       matrix[k][maxrow] = tmp;
     }
 
-    for (let j = i + 1; j < n; j++) {
-      for (let k = n; k >= i; k--) {
-        matrix[k][j] -= (matrix[k][i] * matrix[i][j]) / matrix[i][i];
+    for (var _j = i + 1; _j < n; _j++) {
+      for (var _k = n; _k >= i; _k--) {
+        matrix[_k][_j] -= matrix[_k][i] * matrix[i][_j] / matrix[i][i];
       }
     }
   }
 
-  for (let j = n - 1; j >= 0; j--) {
-    let total = 0;
-    for (let k = j + 1; k < n; k++) {
-      total += matrix[k][j] * coefficients[k];
+  for (var _j2 = n - 1; _j2 >= 0; _j2--) {
+    var total = 0;
+    for (var _k2 = _j2 + 1; _k2 < n; _k2++) {
+      total += matrix[_k2][_j2] * coefficients[_k2];
     }
 
-    coefficients[j] = (matrix[n][j] - total) / matrix[j][j];
+    coefficients[_j2] = (matrix[n][_j2] - total) / matrix[_j2][_j2];
   }
 
   return coefficients;
@@ -95,8 +105,7 @@ function gaussianElimination(input, order) {
 * @return {numbr} - The number, rounded
 */
 function round(number, precision) {
-  // const factor = 10 ** precision;
-  const factor = Math.pow(10, precision)
+  var factor = Math.pow(10, precision);
   return Math.round(number * factor) / factor;
 }
 
@@ -105,12 +114,12 @@ function round(number, precision) {
 *
 * @namespace
 */
-const methods = {
-  linear(data, options) {
-    const sum = [0, 0, 0, 0, 0];
-    let len = 0;
+var methods = {
+  linear: function linear(data, options) {
+    var sum = [0, 0, 0, 0, 0];
+    var len = 0;
 
-    for (let n = 0; n < data.length; n++) {
+    for (var n = 0; n < data.length; n++) {
       if (data[n][1] !== null) {
         len++;
         sum[0] += data[n][0];
@@ -121,31 +130,31 @@ const methods = {
       }
     }
 
-    const run = ((len * sum[2]) - (sum[0] * sum[0]));
-    const rise = ((len * sum[3]) - (sum[0] * sum[1]));
-    const gradient = run === 0 ? 0 : round(rise / run, options.precision);
-    const intercept = round((sum[1] / len) - ((gradient * sum[0]) / len), options.precision);
+    var run = len * sum[2] - sum[0] * sum[0];
+    var rise = len * sum[3] - sum[0] * sum[1];
+    var gradient = run === 0 ? 0 : round(rise / run, options.precision);
+    var intercept = round(sum[1] / len - gradient * sum[0] / len, options.precision);
 
-    const predict = x => ([
-      round(x, options.precision),
-      round((gradient * x) + intercept, options.precision)]
-    );
+    var predict = function predict(x) {
+      return [round(x, options.precision), round(gradient * x + intercept, options.precision)];
+    };
 
-    const points = data.map(point => predict(point[0]));
+    var points = data.map(function (point) {
+      return predict(point[0]);
+    });
 
     return {
-      points,
-      predict,
+      points: points,
+      predict: predict,
       equation: [gradient, intercept],
       r2: round(determinationCoefficient(data, points), options.precision),
-      string: intercept === 0 ? `y = ${gradient}x` : `y = ${gradient}x + ${intercept}`,
+      string: intercept === 0 ? 'y = ' + gradient + 'x' : 'y = ' + gradient + 'x + ' + intercept
     };
   },
+  exponential: function exponential(data, options) {
+    var sum = [0, 0, 0, 0, 0, 0];
 
-  exponential(data, options) {
-    const sum = [0, 0, 0, 0, 0, 0];
-
-    for (let n = 0; n < data.length; n++) {
+    for (var n = 0; n < data.length; n++) {
       if (data[n][1] !== null) {
         sum[0] += data[n][0];
         sum[1] += data[n][1];
@@ -156,117 +165,117 @@ const methods = {
       }
     }
 
-    const denominator = ((sum[1] * sum[2]) - (sum[5] * sum[5]));
-    const a = Math.exp(((sum[2] * sum[3]) - (sum[5] * sum[4])) / denominator);
-    const b = ((sum[1] * sum[4]) - (sum[5] * sum[3])) / denominator;
-    const coeffA = round(a, options.precision);
-    const coeffB = round(b, options.precision);
-    const predict = x => ([
-      round(x, options.precision),
-      round(coeffA * Math.exp(coeffB * x), options.precision),
-    ]);
+    var denominator = sum[1] * sum[2] - sum[5] * sum[5];
+    var a = Math.exp((sum[2] * sum[3] - sum[5] * sum[4]) / denominator);
+    var b = (sum[1] * sum[4] - sum[5] * sum[3]) / denominator;
+    var coeffA = round(a, options.precision);
+    var coeffB = round(b, options.precision);
+    var predict = function predict(x) {
+      return [round(x, options.precision), round(coeffA * Math.exp(coeffB * x), options.precision)];
+    };
 
-    const points = data.map(point => predict(point[0]));
+    var points = data.map(function (point) {
+      return predict(point[0]);
+    });
 
     return {
-      points,
-      predict,
+      points: points,
+      predict: predict,
       equation: [coeffA, coeffB],
-      string: `y = ${coeffA}e^(${coeffB}x)`,
-      r2: round(determinationCoefficient(data, points), options.precision),
+      string: 'y = ' + coeffA + 'e^(' + coeffB + 'x)',
+      r2: round(determinationCoefficient(data, points), options.precision)
     };
   },
+  logarithmic: function logarithmic(data, options) {
+    var sum = [0, 0, 0, 0];
+    var len = data.length;
 
-  logarithmic(data, options) {
-    const sum = [0, 0, 0, 0];
-    const len = data.length;
-
-    for (let n = 0; n < len; n++) {
+    for (var n = 0; n < len; n++) {
       if (data[n][1] !== null) {
         sum[0] += Math.log(data[n][0]);
         sum[1] += data[n][1] * Math.log(data[n][0]);
         sum[2] += data[n][1];
-        sum[3] += (Math.log(data[n][0]) ** 2);
+        sum[3] += Math.pow(Math.log(data[n][0]), 2);
       }
     }
 
-    const a = ((len * sum[1]) - (sum[2] * sum[0])) / ((len * sum[3]) - (sum[0] * sum[0]));
-    const coeffB = round(a, options.precision);
-    const coeffA = round((sum[2] - (coeffB * sum[0])) / len, options.precision);
+    var a = (len * sum[1] - sum[2] * sum[0]) / (len * sum[3] - sum[0] * sum[0]);
+    var coeffB = round(a, options.precision);
+    var coeffA = round((sum[2] - coeffB * sum[0]) / len, options.precision);
 
-    const predict = x => ([
-      round(x, options.precision),
-      round(round(coeffA + (coeffB * Math.log(x)), options.precision), options.precision),
-    ]);
+    var predict = function predict(x) {
+      return [round(x, options.precision), round(round(coeffA + coeffB * Math.log(x), options.precision), options.precision)];
+    };
 
-    const points = data.map(point => predict(point[0]));
+    var points = data.map(function (point) {
+      return predict(point[0]);
+    });
 
     return {
-      points,
-      predict,
+      points: points,
+      predict: predict,
       equation: [coeffA, coeffB],
-      string: `y = ${coeffA} + ${coeffB} ln(x)`,
-      r2: round(determinationCoefficient(data, points), options.precision),
+      string: 'y = ' + coeffA + ' + ' + coeffB + ' ln(x)',
+      r2: round(determinationCoefficient(data, points), options.precision)
     };
   },
+  power: function power(data, options) {
+    var sum = [0, 0, 0, 0, 0];
+    var len = data.length;
 
-  power(data, options) {
-    const sum = [0, 0, 0, 0, 0];
-    const len = data.length;
-
-    for (let n = 0; n < len; n++) {
+    for (var n = 0; n < len; n++) {
       if (data[n][1] !== null) {
         sum[0] += Math.log(data[n][0]);
         sum[1] += Math.log(data[n][1]) * Math.log(data[n][0]);
         sum[2] += Math.log(data[n][1]);
-        sum[3] += (Math.log(data[n][0]) ** 2);
+        sum[3] += Math.pow(Math.log(data[n][0]), 2);
       }
     }
 
-    const b = ((len * sum[1]) - (sum[0] * sum[2])) / ((len * sum[3]) - (sum[0] ** 2));
-    const a = ((sum[2] - (b * sum[0])) / len);
-    const coeffA = round(Math.exp(a), options.precision);
-    const coeffB = round(b, options.precision);
+    var b = (len * sum[1] - sum[0] * sum[2]) / (len * sum[3] - Math.pow(sum[0], 2));
+    var a = (sum[2] - b * sum[0]) / len;
+    var coeffA = round(Math.exp(a), options.precision);
+    var coeffB = round(b, options.precision);
 
-    const predict = x => ([
-      round(x, options.precision),
-      round(round(coeffA * (x ** coeffB), options.precision), options.precision),
-    ]);
+    var predict = function predict(x) {
+      return [round(x, options.precision), round(round(coeffA * Math.pow(x, coeffB), options.precision), options.precision)];
+    };
 
-    const points = data.map(point => predict(point[0]));
+    var points = data.map(function (point) {
+      return predict(point[0]);
+    });
 
     return {
-      points,
-      predict,
+      points: points,
+      predict: predict,
       equation: [coeffA, coeffB],
-      string: `y = ${coeffA}x^${coeffB}`,
-      r2: round(determinationCoefficient(data, points), options.precision),
+      string: 'y = ' + coeffA + 'x^' + coeffB,
+      r2: round(determinationCoefficient(data, points), options.precision)
     };
   },
+  polynomial: function polynomial(data, options) {
+    var lhs = [];
+    var rhs = [];
+    var a = 0;
+    var b = 0;
+    var len = data.length;
+    var k = options.order + 1;
 
-  polynomial(data, options) {
-    const lhs = [];
-    const rhs = [];
-    let a = 0;
-    let b = 0;
-    const len = data.length;
-    const k = options.order + 1;
-
-    for (let i = 0; i < k; i++) {
-      for (let l = 0; l < len; l++) {
+    for (var i = 0; i < k; i++) {
+      for (var l = 0; l < len; l++) {
         if (data[l][1] !== null) {
-          a += (data[l][0] ** i) * data[l][1];
+          a += Math.pow(data[l][0], i) * data[l][1];
         }
       }
 
       lhs.push(a);
       a = 0;
 
-      const c = [];
-      for (let j = 0; j < k; j++) {
-        for (let l = 0; l < len; l++) {
-          if (data[l][1] !== null) {
-            b += data[l][0] ** (i + j);
+      var c = [];
+      for (var j = 0; j < k; j++) {
+        for (var _l = 0; _l < len; _l++) {
+          if (data[_l][1] !== null) {
+            b += Math.pow(data[_l][0], i + j);
           }
         }
         c.push(b);
@@ -276,50 +285,49 @@ const methods = {
     }
     rhs.push(lhs);
 
-    const coefficients = gaussianElimination(rhs, k).map(v => round(v, options.precision));
+    var coefficients = gaussianElimination(rhs, k).map(function (v) {
+      return round(v, options.precision);
+    });
 
-    const predict = x => ([
-      round(x, options.precision),
-      round(
-        coefficients.reduce((sum, coeff, power) => sum + (coeff * (x ** power)), 0),
-        options.precision,
-      ),
-    ]);
+    var predict = function predict(x) {
+      return [round(x, options.precision), round(coefficients.reduce(function (sum, coeff, power) {
+        return sum + coeff * Math.pow(x, power);
+      }, 0), options.precision)];
+    };
 
-    const points = data.map(point => predict(point[0]));
+    var points = data.map(function (point) {
+      return predict(point[0]);
+    });
 
-    let string = 'y = ';
-    for (let i = coefficients.length - 1; i >= 0; i--) {
-      if (i > 1) {
-        string += `${coefficients[i]}x^${i} + `;
-      } else if (i === 1) {
-        string += `${coefficients[i]}x + `;
+    var string = 'y = ';
+    for (var _i = coefficients.length - 1; _i >= 0; _i--) {
+      if (_i > 1) {
+        string += coefficients[_i] + 'x^' + _i + ' + ';
+      } else if (_i === 1) {
+        string += coefficients[_i] + 'x + ';
       } else {
-        string += coefficients[i];
+        string += coefficients[_i];
       }
     }
 
     return {
-      string,
-      points,
-      predict,
-      equation: [...coefficients].reverse(),
-      r2: round(determinationCoefficient(data, points), options.precision),
+      string: string,
+      points: points,
+      predict: predict,
+      equation: [].concat(_toConsumableArray(coefficients)).reverse(),
+      r2: round(determinationCoefficient(data, points), options.precision)
     };
-  },
+  }
 };
 
 function createWrapper() {
-  const reduce = (accumulator, name) => ({
-    _round: round,
-    ...accumulator,
-    [name](data, supplied) {
-      return methods[name](data, {
-        ...DEFAULT_OPTIONS,
-        ...supplied,
-      });
-    },
-  });
+  var reduce = function reduce(accumulator, name) {
+    return _extends({
+      _round: round
+    }, accumulator, _defineProperty({}, name, function (data, supplied) {
+      return methods[name](data, _extends({}, DEFAULT_OPTIONS, supplied));
+    }));
+  };
 
   return Object.keys(methods).reduce(reduce, {});
 }
