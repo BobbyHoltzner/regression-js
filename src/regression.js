@@ -95,7 +95,8 @@ function gaussianElimination(input, order) {
 * @return {numbr} - The number, rounded
 */
 function round(number, precision) {
-  const factor = 10 ** precision;
+  // const factor = 10 ** precision;
+  const factor = Math.pow(10, precision)
   return Math.round(number * factor) / factor;
 }
 
